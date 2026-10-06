@@ -1,0 +1,45 @@
+{
+    "name": "scbudgetweb/laravel-cookie-consent",
+    "description": "A simple, compliant cookie consent banner for Laravel: Accept, Reject and Customise, with functional, analytics and marketing categories and automatic cookie discovery.",
+    "keywords": ["laravel", "cookies", "cookie consent", "gdpr", "pecr", "uk gdpr"],
+    "homepage": "https://github.com/scbudgetweb/laravel-cookie-consent",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "illuminate/cookie": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/view": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^10.5|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ScBudgetWeb\\CookieConsent\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ScBudgetWeb\\CookieConsent\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ScBudgetWeb\\CookieConsent\\CookieConsentServiceProvider"
+            ],
+            "aliases": {
+                "CookieConsent": "ScBudgetWeb\\CookieConsent\\Facades\\CookieConsent"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    }
+}
