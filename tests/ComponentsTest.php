@@ -22,6 +22,15 @@ class ComponentsTest extends TestCase
             ->assertSee('data-cc-dialog', false);
     }
 
+    public function test_accept_and_reject_have_equal_visual_weight(): void
+    {
+        $this->withConsentCookie(null);
+
+        $this->blade('<x-cookie-consent />')
+            ->assertSee('class="cc-btn cc-btn--primary" data-cc-accept', false)
+            ->assertSee('class="cc-btn cc-btn--primary" data-cc-reject', false);
+    }
+
     public function test_only_the_settings_window_renders_after_the_visitor_chooses(): void
     {
         $this->withConsentCookie(['analytics' => false, 'marketing' => false]);

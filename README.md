@@ -173,12 +173,12 @@ The banner is a white panel with blue buttons. Change it with CSS variables:
 ```css
 #cookie-consent {
     --cc-accent: #0f766e;        /* buttons, switches and links */
-    --cc-accent-text: #ffffff;   /* text on the main button */
+    --cc-accent-text: #ffffff;   /* text on the Accept, Reject and Save buttons */
     --cc-bg: #ffffff;
     --cc-text: #1f2937;
     --cc-muted: #4b5563;
     --cc-border: #e5e7eb;
-    --cc-secondary-bg: #f3f4f6;  /* Reject and Customise buttons */
+    --cc-secondary-bg: #f3f4f6;  /* Customise button */
     --cc-radius: 0.75rem;
     --cc-font: inherit;
 }

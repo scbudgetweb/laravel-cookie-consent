@@ -66,7 +66,7 @@
                 </div>
                 <div class="cc-actions">
                     <button type="button" class="cc-btn cc-btn--primary" data-cc-accept>{{ __('cookies::messages.accept') }}</button>
-                    <button type="button" class="cc-btn cc-btn--secondary" data-cc-reject>{{ __('cookies::messages.reject') }}</button>
+                    <button type="button" class="cc-btn cc-btn--primary" data-cc-reject>{{ __('cookies::messages.reject') }}</button>
                     <button type="button" class="cc-btn cc-btn--secondary" data-cc-customise>{{ __('cookies::messages.customise') }}</button>
                 </div>
             </div>
