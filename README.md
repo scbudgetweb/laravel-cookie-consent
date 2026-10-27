@@ -12,6 +12,8 @@ A simple cookie consent banner for Laravel that follows UK GDPR and PECR guidanc
 
 Requires PHP 8.2+ and Laravel 11, 12 or 13.
 
+<a href="https://buymeacoffee.com/shaunn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40"></a>
+
 ## Installation
 
 ```bash
@@ -220,3 +222,9 @@ This package helps you collect consent properly. It isn't legal advice. You're s
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
+
+## Support
+
+If Cookie Consent saves you time, you can buy me a coffee:
+
+<a href="https://buymeacoffee.com/shaunn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40"></a>
