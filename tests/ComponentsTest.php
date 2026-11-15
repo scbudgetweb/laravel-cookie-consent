@@ -117,6 +117,70 @@ class ComponentsTest extends TestCase
             ->assertSee('fbq(', false);
     }
 
+    public function test_default_allowed_scripts_load_before_the_visitor_chooses(): void
+    {
+        config(['cookies.default_allowed' => ['analytics']]);
+        $this->withConsentCookie(null);
+
+        $this->blade('<x-cookie-consent-scripts :scripts="$scripts" />', ['scripts' => self::SCRIPTS])
+            ->assertSee('googletagmanager.com', false)
+            ->assertDontSee('fbq(', false);
+    }
+
+    public function test_rejecting_stops_default_allowed_scripts(): void
+    {
+        config(['cookies.default_allowed' => ['analytics']]);
+        $this->withConsentCookie(['analytics' => false, 'marketing' => false]);
+
+        $this->blade('<x-cookie-consent-scripts :scripts="$scripts" />', ['scripts' => self::SCRIPTS])
+            ->assertDontSee('googletagmanager.com', false);
+    }
+
+    public function test_the_banner_says_which_categories_are_on_by_default(): void
+    {
+        config(['cookies.default_allowed' => ['analytics']]);
+        $this->withConsentCookie(null);
+
+        $this->blade('<x-cookie-consent />')
+            ->assertSee('We use analytics cookies to understand how people use this site')
+            ->assertSee('On unless you switch it off.')
+            ->assertSee('&quot;defaults&quot;:[&quot;analytics&quot;]', false);
+    }
+
+    public function test_the_banner_keeps_the_opt_in_wording_without_defaults(): void
+    {
+        $this->withConsentCookie(null);
+
+        $this->blade('<x-cookie-consent />')
+            ->assertSee('Accepting lets us process data')
+            ->assertDontSee('On unless you switch it off.');
+    }
+
+    public function test_google_consent_defaults_render_only_when_switched_on(): void
+    {
+        $this->withConsentCookie(null);
+
+        $this->blade('<x-cookie-consent-google />')->assertDontSee('gtag(', false);
+
+        config(['cookies.google_consent_mode' => true, 'cookies.default_allowed' => ['analytics']]);
+
+        $this->blade('<x-cookie-consent-google />')
+            ->assertSee("gtag('consent', 'default'", false)
+            ->assertSee('"analytics_storage":"granted"', false)
+            ->assertSee('"ad_storage":"denied"', false)
+            ->assertSee("gtag('set', 'ads_data_redaction', true)", false);
+    }
+
+    public function test_google_consent_defaults_grant_ads_after_marketing_consent(): void
+    {
+        config(['cookies.google_consent_mode' => true]);
+        $this->withConsentCookie(['analytics' => true, 'marketing' => true]);
+
+        $this->blade('<x-cookie-consent-google />')
+            ->assertSee('"ad_storage":"granted"', false)
+            ->assertDontSee('ads_data_redaction', false);
+    }
+
     public function test_scripts_default_to_the_config(): void
     {
         config(['cookies.scripts' => self::SCRIPTS]);

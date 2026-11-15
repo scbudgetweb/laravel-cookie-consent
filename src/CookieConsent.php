@@ -20,7 +20,8 @@ class CookieConsent
 
     /**
      * Whether the visitor allows a category. Always true when the banner is disabled
-     * and for required categories; otherwise only after the visitor has said yes.
+     * and for required categories. Otherwise the visitor's own choice, or, before they
+     * have chosen, whether the category is on by default (cookies.default_allowed).
      */
     public function allows(string $category): bool
     {
@@ -28,7 +29,67 @@ class CookieConsent
             return true;
         }
 
-        return ($this->preferences()[$category] ?? false) === true;
+        $preferences = $this->preferences();
+
+        if ($preferences === null) {
+            return in_array($category, $this->defaultAllowed(), true);
+        }
+
+        return ($preferences[$category] ?? false) === true;
+    }
+
+    /**
+     * Optional categories that count as allowed until the visitor objects, for example
+     * Analytics under the UK's statistical purposes exception. Unknown and required
+     * categories are ignored.
+     *
+     * @return list<string>
+     */
+    public function defaultAllowed(): array
+    {
+        return array_values(array_intersect($this->optionalCategories(), (array) config('cookies.default_allowed', [])));
+    }
+
+    /**
+     * Whether to tell Google tags what the visitor allows (Google Consent Mode v2).
+     */
+    public function usesGoogleConsentMode(): bool
+    {
+        return (bool) config('cookies.google_consent_mode', false);
+    }
+
+    /**
+     * Google consent types per category (cookies.google_consent_types), e.g. analytics => [analytics_storage].
+     *
+     * @return array<string, list<string>>
+     */
+    public function googleConsentTypes(): array
+    {
+        $types = [];
+
+        foreach ((array) config('cookies.google_consent_types', []) as $category => $categoryTypes) {
+            $types[(string) $category] = array_values(array_map('strval', (array) $categoryTypes));
+        }
+
+        return $types;
+    }
+
+    /**
+     * Each Google consent type as "granted" or "denied", from what the visitor allows right now.
+     *
+     * @return array<string, 'granted'|'denied'>
+     */
+    public function googleConsentState(): array
+    {
+        $state = [];
+
+        foreach ($this->googleConsentTypes() as $category => $types) {
+            foreach ($types as $type) {
+                $state[$type] = $this->allows($category) ? 'granted' : 'denied';
+            }
+        }
+
+        return $state;
     }
 
     public function hasDecided(): bool

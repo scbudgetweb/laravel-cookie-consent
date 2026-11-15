@@ -52,6 +52,30 @@ return [
     ],
 
     /*
+     * Optional categories that are on until the visitor objects, instead of off
+     * until they agree. For example ['analytics'] under the UK's statistical
+     * purposes exception (Data (Use and Access) Act 2025): analytics used only
+     * to improve the site needs no consent, as long as visitors are told and can
+     * switch it off. The banner says so, and Reject still turns it off. Leave
+     * empty for opt-in only (required in the EU, and for any advertising).
+     */
+    'default_allowed' => [],
+
+    /*
+     * Google Consent Mode v2. When true, <x-cookie-consent-google /> (place it in
+     * <head>, before any Google tag) tells Google tags what the visitor allows,
+     * and the banner updates it when they choose. google_consent_types maps each
+     * category to Google's consent types; types not listed are never sent.
+     */
+    'google_consent_mode' => false,
+
+    'google_consent_types' => [
+        'functional' => ['functionality_storage', 'security_storage'],
+        'analytics' => ['analytics_storage'],
+        'marketing' => ['ad_storage', 'ad_user_data', 'ad_personalization'],
+    ],
+
+    /*
      * Tracking snippets per category. <x-cookie-consent-scripts /> outputs each
      * one only when its category is allowed, and the banner scans them to list
      * the cookies they set (Google Analytics, Meta Pixel, LinkedIn and more).

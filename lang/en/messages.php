@@ -3,6 +3,8 @@
 return [
     'banner_title' => 'Cookies on :site',
     'banner_text' => 'We use cookies and similar technologies to store and access information on your device. Accepting lets us process data such as browsing behaviour on this site. Not accepting, or withdrawing consent later, may affect some features.',
+    'banner_text_defaults' => 'We use :categories cookies to understand how people use this site, so we can improve it. They\'re on unless you switch them off. Accept also allows our other optional cookies, such as for advertising. Reject switches off everything except the cookies the site needs to work.',
+    'on_by_default' => 'On unless you switch it off. Used only to improve this site.',
     'accept' => 'Accept',
     'reject' => 'Reject',
     'customise' => 'Customise',

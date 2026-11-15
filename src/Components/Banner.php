@@ -34,6 +34,8 @@ class Banner extends Component
         $scripts = $this->scripts ?? (array) config('cookies.scripts', []);
         $preferences = $consent->preferences();
 
+        $defaults = $consent->defaultAllowed();
+
         $categories = [];
         $erase = [];
 
@@ -45,6 +47,7 @@ class Banner extends Component
                 'label' => $consent->label($key),
                 'description' => $consent->description($key),
                 'required' => $category['required'],
+                'onByDefault' => in_array($key, $defaults, true),
                 'cookies' => $cookies,
             ];
 
@@ -56,6 +59,9 @@ class Banner extends Component
         return view('cookies::banner', [
             'categories' => $categories,
             'showBanner' => $preferences === null,
+            'defaultsText' => $defaults === [] ? null : __('cookies::messages.banner_text_defaults', [
+                'categories' => mb_strtolower(implode(', ', array_map(fn (string $key): string => $consent->label($key), $defaults))),
+            ]),
             'showCookieList' => (bool) config('cookies.show_cookie_list', false),
             'privacyPolicyUrl' => $this->privacyPolicyUrl ?? config('cookies.privacy_policy_url'),
             'config' => [
@@ -65,6 +71,8 @@ class Banner extends Component
                 'optional' => $consent->optionalCategories(),
                 'required' => array_values(array_diff(array_keys($consent->categories()), $consent->optionalCategories())),
                 'preferences' => $preferences,
+                'defaults' => $defaults,
+                'googleConsentTypes' => $consent->usesGoogleConsentMode() ? $consent->googleConsentTypes() : null,
                 'erase' => $erase,
             ],
         ]);

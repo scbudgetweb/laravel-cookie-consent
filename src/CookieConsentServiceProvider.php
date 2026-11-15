@@ -6,6 +6,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use ScBudgetWeb\CookieConsent\Components\Banner;
+use ScBudgetWeb\CookieConsent\Components\GoogleConsent;
 use ScBudgetWeb\CookieConsent\Components\Scripts;
 
 class CookieConsentServiceProvider extends ServiceProvider
@@ -25,6 +26,7 @@ class CookieConsentServiceProvider extends ServiceProvider
 
         Blade::component('cookie-consent', Banner::class);
         Blade::component('cookie-consent-scripts', Scripts::class);
+        Blade::component('cookie-consent-google', GoogleConsent::class);
         Blade::if('cookieConsent', fn (string $category): bool => $this->app->make(CookieConsent::class)->allows($category));
 
         // The banner writes this cookie in JavaScript, so Laravel must not try to decrypt it.

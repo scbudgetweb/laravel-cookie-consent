@@ -29,6 +29,53 @@ class CookieConsentTest extends TestCase
         $this->assertFalse($this->consent()->allows('marketing'));
     }
 
+    public function test_default_allowed_categories_are_on_until_the_visitor_chooses(): void
+    {
+        config(['cookies.default_allowed' => ['analytics']]);
+        $this->withConsentCookie(null);
+
+        $this->assertFalse($this->consent()->hasDecided());
+        $this->assertTrue($this->consent()->allows('analytics'));
+        $this->assertFalse($this->consent()->allows('marketing'));
+    }
+
+    public function test_the_visitors_choice_beats_a_default(): void
+    {
+        config(['cookies.default_allowed' => ['analytics']]);
+        $this->withConsentCookie(['analytics' => false, 'marketing' => false]);
+
+        $this->assertFalse($this->consent()->allows('analytics'));
+    }
+
+    public function test_default_allowed_ignores_unknown_and_required_categories(): void
+    {
+        config(['cookies.default_allowed' => ['analytics', 'functional', 'social']]);
+
+        $this->assertSame(['analytics'], $this->consent()->defaultAllowed());
+    }
+
+    public function test_google_consent_state_follows_what_the_visitor_allows(): void
+    {
+        config(['cookies.default_allowed' => ['analytics']]);
+        $this->withConsentCookie(null);
+
+        $this->assertSame([
+            'functionality_storage' => 'granted',
+            'security_storage' => 'granted',
+            'analytics_storage' => 'granted',
+            'ad_storage' => 'denied',
+            'ad_user_data' => 'denied',
+            'ad_personalization' => 'denied',
+        ], $this->consent()->googleConsentState());
+
+        $this->withConsentCookie(['analytics' => false, 'marketing' => true]);
+
+        $state = $this->consent()->googleConsentState();
+        $this->assertSame('denied', $state['analytics_storage']);
+        $this->assertSame('granted', $state['ad_storage']);
+        $this->assertSame('granted', $state['ad_personalization']);
+    }
+
     public function test_required_categories_are_always_allowed(): void
     {
         $this->withConsentCookie(['analytics' => false, 'marketing' => false]);

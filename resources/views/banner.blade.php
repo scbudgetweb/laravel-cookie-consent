@@ -56,9 +56,10 @@
         <section class="cc-banner" data-cc-banner role="region" aria-labelledby="cc-banner-title">
             <div class="cc-banner__inner">
                 <div class="cc-banner__content">
-                    <h2 class="cc-banner__title" id="cc-banner-title">{{ __('cookies::messages.banner_title', ['site' => config('app.name')]) }}</h2>
+                    {{-- Not a heading: the banner is on every page, so a heading would clutter every page's outline. The region is named by it instead. --}}
+                    <p class="cc-banner__title" id="cc-banner-title">{{ __('cookies::messages.banner_title', ['site' => config('app.name')]) }}</p>
                     <p class="cc-banner__text">
-                        {{ __('cookies::messages.banner_text') }}
+                        {{ $defaultsText ?? __('cookies::messages.banner_text') }}
                         @if ($privacyPolicyUrl)
                             <a href="{{ $privacyPolicyUrl }}" class="cc-link">{{ __('cookies::messages.privacy_policy') }}</a>
                         @endif
@@ -75,7 +76,7 @@
 
     <dialog class="cc-modal" data-cc-dialog aria-labelledby="cc-modal-title">
         <div class="cc-modal__header">
-            <h2 class="cc-modal__title" id="cc-modal-title">{{ __('cookies::messages.settings_title') }}</h2>
+            <p class="cc-modal__title" id="cc-modal-title">{{ __('cookies::messages.settings_title') }}</p>
             <button type="button" class="cc-close" data-cc-close aria-label="{{ __('cookies::messages.close') }}">&times;</button>
         </div>
 
@@ -96,6 +97,10 @@
 
                     @if ($category['description'] !== '')
                         <p class="cc-category__description">{{ $category['description'] }}</p>
+                    @endif
+
+                    @if ($category['onByDefault'])
+                        <p class="cc-category__description">{{ __('cookies::messages.on_by_default') }}</p>
                     @endif
 
                     @if ($showCookieList)
@@ -154,8 +159,28 @@
             var dialog = root.querySelector('[data-cc-dialog]');
             var expired = '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
 
+            // What the visitor allows now: their saved choices, or the on-by-default categories until they choose.
+            function effective(preferences) {
+                if (preferences) { return preferences; }
+                var defaults = {};
+                config.optional.forEach(function (category) { defaults[category] = config.defaults.indexOf(category) !== -1; });
+                return defaults;
+            }
+
             function allowedList(preferences) {
-                return config.optional.filter(function (category) { return !!(preferences && preferences[category]); }).join(',');
+                var current = effective(preferences);
+                return config.optional.filter(function (category) { return !!current[category]; }).join(',');
+            }
+
+            // Google Consent Mode v2: tell Google tags about the new choices before the page reloads.
+            function updateGoogleConsent(preferences) {
+                if (!config.googleConsentTypes || typeof window.gtag !== 'function') { return; }
+                var state = {};
+                Object.keys(config.googleConsentTypes).forEach(function (category) {
+                    var granted = config.required.indexOf(category) !== -1 || !!preferences[category];
+                    config.googleConsentTypes[category].forEach(function (type) { state[type] = granted ? 'granted' : 'denied'; });
+                });
+                window.gtag('consent', 'update', state);
             }
 
             function cookieNames() {
@@ -200,6 +225,8 @@
                 if (banner) { banner.hidden = true; }
                 if (dialog.open) { dialog.close(); }
 
+                updateGoogleConsent(value);
+
                 document.dispatchEvent(new CustomEvent('cookie-consent:updated', { detail: value }));
 
                 // Reload so scripts for newly allowed categories load (or refused ones stop loading).
@@ -215,7 +242,7 @@
             function open() {
                 config.optional.forEach(function (category) {
                     var input = root.querySelector('[data-cc-category="' + category + '"]');
-                    if (input) { input.checked = !!(config.preferences && config.preferences[category]); }
+                    if (input) { input.checked = !!effective(config.preferences)[category]; }
                 });
                 if (!dialog.open) { dialog.showModal(); }
             }
@@ -252,7 +279,7 @@
             window.CookieConsent = {
                 open: open,
                 allows: function (category) {
-                    return config.required.indexOf(category) !== -1 || !!(config.preferences && config.preferences[category]);
+                    return config.required.indexOf(category) !== -1 || !!effective(config.preferences)[category];
                 }
             };
         })();

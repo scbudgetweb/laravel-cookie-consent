@@ -165,8 +165,35 @@ A name ending in `*` matches any suffix. Pull requests adding more services are 
 | `scripts` | `[]` | Tracking snippets per category. |
 | `cookies` | `[]` | Extra cookies to list per category. |
 | `services` | `[]` | Extra services for automatic discovery. |
+| `default_allowed` | `[]` | Optional categories that are on until the visitor objects, e.g. `['analytics']`. See below. |
+| `google_consent_mode` | `false` | Send Google Consent Mode v2 signals. See below. |
+| `google_consent_types` | functional, analytics, marketing | Which Google consent types each category controls. |
 
 You can add your own categories (for example `'social' => ['required' => false]`). Give them a label and description in the translation file.
+
+### Analytics on until visitors object (UK)
+
+Since 5 February 2026, the UK's Data (Use and Access) Act 2025 lets sites use analytics without consent when its *only* purpose is collecting statistics to improve the site, as long as visitors are told clearly and can object easily (the "statistical purposes" exception in PECR). Advertising, including ad measurement, still needs consent. The ICO's guidance on the exceptions explains the conditions.
+
+```php
+'default_allowed' => ['analytics'],
+```
+
+With this set, Analytics scripts load for visitors who haven't chosen yet, the banner says Analytics is on unless they switch it off, and **Reject** or unticking Analytics still turns it off (and deletes its cookies). Only use it if your analytics is genuinely statistics-only: for Google Analytics, keep Google Signals off, don't link Google Ads, and turn off data sharing for Google products and modelling. Leave it empty in the EU, where analytics still needs opt-in consent.
+
+### Google Consent Mode v2
+
+```php
+'google_consent_mode' => true,
+```
+
+Put the defaults in your layout's `<head>`, before any Google tag:
+
+```blade
+<x-cookie-consent-google />
+```
+
+It tells Google tags what the visitor allows (`analytics_storage` from Analytics; `ad_storage`, `ad_user_data` and `ad_personalization` from Marketing), with `ads_data_redaction` on while advertising is refused. The banner sends a `consent update` when the visitor chooses. Google tags still only load when their category is allowed, so nothing is sent to Google before that.
 
 ## Styling
 
